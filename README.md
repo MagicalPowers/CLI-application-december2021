@@ -21,3 +21,6 @@ https://github.com/MagicalPowers/CLI-application-december2021
 - inquirer module
 - Octokit module
 
+### Example of use
+
+![Follow along with this gif to see the basic functionality of this application.](./assets/gifs/example1.gif)
