@@ -1,9 +1,15 @@
+//This requires the dotenv module and imports our authorization token, using a keys.js file as an intermediary.
 require("dotenv").config();
 const keys = require("./keys.js");
-const fs = require("fs");
-const inquirer = require("inquirer");
-const { Octokit } = require("@octokit/rest");
 const token = keys.githubAuth.authToken;
+//We are using the filesystem for loggin purposes.
+const fs = require("fs");
+//We are using the inquirer module for a user-friendly CLI.
+const inquirer = require("inquirer");
+//We are using the Octokit module to interact with the GitHub REST API.
+const { Octokit } = require("@octokit/rest");
+
+//Instantiating Octokit
 const octokit = new Octokit({
   auth: token,
   userAgent: "sampleAppCLI v1.0",
@@ -37,6 +43,7 @@ const issueGetList = async (req, res) => {
       console.log(issueTitles);
     });
 };
+
 //This function creates a new issue, using the title and body information gathered from the user.
 const issueCreate = async (title, body) => {
   await octokit.rest.issues.create({
@@ -47,51 +54,21 @@ const issueCreate = async (title, body) => {
   });
 };
 
-// async (req, res) => {
-//   await octokit.rest.issues.get({
-//     owner: "MagicalPowers",
-//     repo: "CLI-application-december2021",
-//   });
-
-//   console.log(res);
-// };
-//========================================================
-const userCommand = process.argv[2];
-const userRequest1 = "";
-
-//For multiword requests
-for (i = 3; process.argv[i]; i++) {
-  userRequest1 += process.argv[i] + "+";
-}
-const userRequest = userRequest1.slice(0, -1);
-
-//Switch for multiple functions
-// const processInput = (userCommand, input) => {
-//   switch (userCommand) {
-//     case "create-issue":
-//       issueCreate(input);
-//       break;
-//     case "get-issues":
-//       issueGetList;
-//       break;
-//     default:
-//       console.log("Not a recognized command.");
-//       break;
-//   }
-// };
-//ask user for command
+//This is a prompt that lists possible commands.
 const initialPrompt = {
   type: "list",
   name: "userCommand",
   message:
-    "Hello. Would you like you Create an issue or Get a List of current issues?",
+    "Would you like you create an issue or get a list of current issues?",
   choices: ["Create Issue", "Get List of Issues"],
 };
+
+//ask user for title and message body
 const issueQuestions = [
   {
     type: "input",
     name: "issueTitle",
-    message: "What is the Title of this Issue?",
+    message: "What is the title of this issue?",
   },
   {
     type: "input",
@@ -100,56 +77,34 @@ const issueQuestions = [
   },
 ];
 
-//Create an issue.
-// const issueCreate = await octokit.rest.issues.create({
-//     owner: "MagicalPowers",
-//     repo: "CLI-application-december2021",
-//     title: input,
-//     body: "this issue is from the CLI",
-// });
-
-//Get a list of issues
-// const issueGetList = await octokit.rest.issues.get({
-//     owner: "MagicalPowers",
-//     repo: "CLI-application-december2021",
-// });
-
+//This is the initial prompt, with results that depend upon the user choices.
 function initialize() {
   inquirer.prompt(initialPrompt).then((answers) => {
     if (answers.userCommand === "Create Issue") {
       console.log(
-        "Let's get started with an Issue Title, then, the Message you'd like to send."
+        "Let's get started with an Issue Title, then, the Message Body."
       );
       inquirer.prompt(issueQuestions).then((answers) => {
         const title = answers.issueTitle;
         const body = answers.issueMessage;
         console.log(answers);
-        console.log(title, body);
         issueCreate(title, body);
+        console.log("Issue created.");
+        initialize();
       });
     } else if (answers.userCommand === "Get List of Issues") {
       console.log("Okay, here is the list of issues that this repository has:");
       issueGetList();
+      setTimeout(() => {
+        initialize();
+      }, 1000);
     } else {
       console.log("Let's try this again.");
-      return;
+      log("error ");
+      initialize();
     }
   });
 }
-
-// () => {
-//   inquirer.prompt([
-//     {
-//       type: "input",
-//       name: "command",
-//       message:
-//         "Hello, would you like to Create an issue (create), or Get a List of current issues (get-list)?",
-//     },
-//   ]);
-// };
-
-//Execute the function switch
-// processInput(userCommand, userRequest);
 
 //Logging Function
 function log() {
